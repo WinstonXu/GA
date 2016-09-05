@@ -119,11 +119,11 @@ class GA extends JComponent{
   ArrayList<Double> pop_fitness;
 
   // Adjust these parameters as necessary for your simulation
-  double MUTATION_RATE = 0.0025;
+  double MUTATION_RATE = 0.001;
   double CROSSOVER_RATE = 0.6;
   int MAX_POLYGON_POINTS = 5;
   int MAX_POLYGONS = 10;
-  int NUM_EPOCHS = 10000;
+  int NUM_EPOCHS = 40000;
 
   public GA(GACanvas _canvas, BufferedImage _realPicture) {
     canvas = _canvas;
@@ -138,6 +138,8 @@ class GA extends JComponent{
   }
 
   // YOUR CODE GOES HERE!
+  //Creates inital population of 50 solutions with random colors
+  //And random coordinates for polygons
   public void createPopulation(int num_chrom){
     Random rand = new Random();
     for(int i = 0; i < num_chrom; i++){
@@ -165,7 +167,7 @@ class GA extends JComponent{
     }
     getPopFitness();
   }
-
+  //Finds euclidean distance of target color and solution color
   public double fitness(GASolution sol){
     BufferedImage curr = sol.getImage();
     double counter = 0;
@@ -191,7 +193,7 @@ class GA extends JComponent{
       pop_fitness.add(fitness(sol));
     }
   }
-
+  //Based off class example
   public GASolution pickFitParent(){
     double totalFitness = 0;
     Random rand = new Random();
@@ -206,13 +208,14 @@ class GA extends JComponent{
     }
     return population.get(index);
   }
-
+  //Averages color values of parents
+  //Randomly chooses some number of polygons to move to child from each parent
   public ArrayList<MyPolygon> crossover(GASolution p1, GASolution p2){
     //average of colors?
     ArrayList<MyPolygon> chrom_1 = p1.getShapes();
     ArrayList<MyPolygon> chrom_2 = p2.getShapes();
-    ArrayList<Color> new_colors = new ArrayList<Color>();
     ArrayList<MyPolygon> new_chrom = new ArrayList<MyPolygon>();
+    ArrayList<Color> new_colors = new ArrayList<Color>();
 
     for(int i = 0; i < chrom_1.size(); i++){
       Color parent1 = chrom_1.get(i).getColor();
@@ -222,29 +225,18 @@ class GA extends JComponent{
       int new_blue = (parent1.getBlue()+parent2.getBlue())%256;
       Color child_color = new Color(new_red, new_green, new_blue);
       new_colors.add(child_color);
-      int[] first_x_coord = chrom_1.get(i).getPolygon().xpoints;
-      int[] first_y_coord = chrom_1.get(i).getPolygon().ypoints;
-      int[] sec_x_coord = chrom_2.get(i).getPolygon().xpoints;
-      int[] sec_y_coord = chrom_2.get(i).getPolygon().ypoints;
-      int[] new_x_coord = new int[MAX_POLYGON_POINTS];
-      int[] new_y_coord = new int[MAX_POLYGON_POINTS];
-      for(int j = 0; j < MAX_POLYGON_POINTS; j++){
-        double prob = Math.random();
-        if(prob > .5){
-          new_x_coord[j] = first_x_coord[j];
-          new_y_coord[j] = first_y_coord[j];
-        }
-        else{
-          new_x_coord[j] = sec_x_coord[j];
-          new_y_coord[j] = sec_y_coord[j];
-        }
-      }
-      new_chrom.add(new MyPolygon(new Polygon(new_x_coord, new_y_coord, MAX_POLYGON_POINTS), child_color));
+    }
+    int cutOff = (int) (Math.random()*chrom_1.size());
+    for(int j = 0; j < cutOff; j++){
+      new_chrom.add(new MyPolygon(chrom_1.get(j).getPolygon(), new_colors.get(j)));
+    }
+    for(int k = cutOff; k < chrom_1.size(); k++){
+      new_chrom.add(new MyPolygon(chrom_2.get(k).getPolygon(), new_colors.get(k)));
     }
 
     return new_chrom;
   }
-//Change mutation to be less random-keep closer to current values?
+//Randomly reassigns color and coordinates
   public ArrayList<MyPolygon> mutate(ArrayList<MyPolygon> child){
     for(int i = 0; i < child.size(); i++){
       double random = Math.random();
@@ -295,7 +287,6 @@ class GA extends JComponent{
   public void runSimulation() {
 
     for(int i = 0; i < NUM_EPOCHS; i++){
-
       createNewPopulation();
       getPopFitness();
       int index = 0;
@@ -306,7 +297,6 @@ class GA extends JComponent{
           max = pop_fitness.get(j);
         }
       }
-
       if(i % 10 == 0){
         GASolution best = population.get(index);
         canvas.setImage(best);
