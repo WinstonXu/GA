@@ -119,11 +119,11 @@ class GA extends JComponent{
   ArrayList<Double> pop_fitness;
 
   // Adjust these parameters as necessary for your simulation
-  double MUTATION_RATE = 0.001;
+  double MUTATION_RATE = 0.004;
   double CROSSOVER_RATE = 0.6;
   int MAX_POLYGON_POINTS = 5;
   int MAX_POLYGONS = 10;
-  int NUM_EPOCHS = 40000;
+  int NUM_EPOCHS = 60000;
 
   public GA(GACanvas _canvas, BufferedImage _realPicture) {
     canvas = _canvas;
@@ -208,6 +208,18 @@ class GA extends JComponent{
     }
     return population.get(index);
   }
+
+  public Polygon copyPoly(MyPolygon mp){
+    Polygon p = mp.getPolygon();
+    int[] xcopy = new int[MAX_POLYGON_POINTS];
+    int[] ycopy = new int[MAX_POLYGON_POINTS];
+    for(int i= 0; i < MAX_POLYGON_POINTS; i++){
+      xcopy[i] = p.xpoints[i];
+      ycopy[i] = p.ypoints[i];
+    }
+    Polygon copy = new Polygon(xcopy, ycopy, MAX_POLYGON_POINTS);
+    return copy;
+  }
   //Averages color values of parents
   //Randomly chooses some number of polygons to move to child from each parent
   public ArrayList<MyPolygon> crossover(GASolution p1, GASolution p2){
@@ -228,10 +240,13 @@ class GA extends JComponent{
     }
     int cutOff = (int) (Math.random()*chrom_1.size());
     for(int j = 0; j < cutOff; j++){
-      new_chrom.add(new MyPolygon(chrom_1.get(j).getPolygon(), new_colors.get(j)));
+        Polygon p = copyPoly(chrom_1.get(j));
+        new_chrom.add(new MyPolygon(p, new_colors.get(j)));
+      //Need to deep copy polygons?
     }
     for(int k = cutOff; k < chrom_1.size(); k++){
-      new_chrom.add(new MyPolygon(chrom_2.get(k).getPolygon(), new_colors.get(k)));
+      Polygon p = copyPoly(chrom_2.get(k));
+      new_chrom.add(new MyPolygon(p, new_colors.get(k)));
     }
 
     return new_chrom;
@@ -297,7 +312,7 @@ class GA extends JComponent{
           max = pop_fitness.get(j);
         }
       }
-      if(i % 10 == 0){
+      if(i % 50 == 0){
         GASolution best = population.get(index);
         canvas.setImage(best);
         canvas.repaint();
