@@ -119,11 +119,11 @@ class GA extends JComponent{
   ArrayList<Double> pop_fitness;
 
   // Adjust these parameters as necessary for your simulation
-  double MUTATION_RATE = 0.004;
+  double MUTATION_RATE = 0.001;
   double CROSSOVER_RATE = 0.6;
   int MAX_POLYGON_POINTS = 5;
   int MAX_POLYGONS = 10;
-  int NUM_EPOCHS = 60000;
+  int NUM_EPOCHS = 20000;
 
   public GA(GACanvas _canvas, BufferedImage _realPicture) {
     canvas = _canvas;
@@ -251,22 +251,39 @@ class GA extends JComponent{
 
     return new_chrom;
   }
-//Randomly reassigns color and coordinates
+//Changes color and polygon coordinates
+//Uses normal distribution to choose new color and coordinates
   public ArrayList<MyPolygon> mutate(ArrayList<MyPolygon> child){
+    Random r = new Random();
     for(int i = 0; i < child.size(); i++){
       double random = Math.random();
       if(random < MUTATION_RATE){
         MyPolygon kid = child.get(i);
         Color c = kid.color;
-        int red = (int) (Math.random()*256);
-        int green = (int) (Math.random()*256);
-        int blue = (int) (Math.random()*256);
+        int red =  ((int)(r.nextGaussian()*c.getRed()))%256;
+        int green = ((int)(r.nextGaussian()*c.getGreen()))%256;
+        int blue = ((int)(r.nextGaussian()*c.getBlue()))%256;
+        while(red < 0){
+          red += 256;
+        }
+        while(green < 0){
+          green += 256;
+        }
+        while(blue < 0){
+          blue += 256;
+        }
         kid.color = new Color(red,green,blue);
         int[] x_coord = kid.polygon.xpoints;
         int[] y_coord = kid.polygon.ypoints;
         for(int j = 0; j < x_coord.length; j++){
-          x_coord[j] = (int) (Math.random()*(width+1));
-          y_coord[j] = (int) (Math.random()*(height+1));
+          x_coord[j] = (int)(r.nextGaussian()*x_coord[j])%(width+1);
+          y_coord[j] = (int)(r.nextGaussian()*y_coord[j])%(height+1);
+          while(x_coord[j] < 0){
+            x_coord[j] += width+1;
+          }
+          while(y_coord[j] < 0){
+            y_coord[j] += height+1;
+          }
         }
         kid.polygon.xpoints = x_coord;
         kid.polygon.ypoints = y_coord;
