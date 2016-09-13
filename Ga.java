@@ -123,7 +123,7 @@ class GA extends JComponent{
   double CROSSOVER_RATE = 0.6;
   int MAX_POLYGON_POINTS = 5;
   int MAX_POLYGONS = 10;
-  int NUM_EPOCHS = 20000;
+  int NUM_EPOCHS = 12000;
 
   public GA(GACanvas _canvas, BufferedImage _realPicture) {
     canvas = _canvas;
