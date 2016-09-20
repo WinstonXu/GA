@@ -119,7 +119,7 @@ class GA extends JComponent{
   ArrayList<Double> pop_fitness;
 
   // Adjust these parameters as necessary for your simulation
-  double MUTATION_RATE = 0.001;
+  double MUTATION_RATE = 0.00097;
   double CROSSOVER_RATE = 0.6;
   int MAX_POLYGON_POINTS = 5;
   int MAX_POLYGONS = 10;
@@ -329,7 +329,7 @@ class GA extends JComponent{
           max = pop_fitness.get(j);
         }
       }
-      if(i % 50 == 0){
+      if(i % 10 == 0){
         GASolution best = population.get(index);
         canvas.setImage(best);
         canvas.repaint();
@@ -347,9 +347,10 @@ class GA extends JComponent{
     JFrame frame = new JFrame();
     frame.setSize(realPicture.getWidth(), realPicture.getHeight());
     frame.setTitle("GA Simulation of Art");
-
+    // GASolution empty = new GASolution(width, height)
     GACanvas theCanvas = new GACanvas(realPicture.getWidth(), realPicture.getHeight());
     frame.add(theCanvas);
+    // frame.setImage(empty)
     frame.setVisible(true);
 
     GA pt = new GA(theCanvas, realPicture);
