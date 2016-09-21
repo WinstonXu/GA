@@ -123,7 +123,7 @@ class GA extends JComponent{
   double CROSSOVER_RATE = 0.6;
   int MAX_POLYGON_POINTS = 5;
   int MAX_POLYGONS = 10;
-  int NUM_EPOCHS = 12000;
+  int NUM_EPOCHS = 65000;
 
   public GA(GACanvas _canvas, BufferedImage _realPicture) {
     canvas = _canvas;
@@ -167,7 +167,10 @@ class GA extends JComponent{
     }
     getPopFitness();
   }
-  //Finds euclidean distance of target color and solution color
+  /**
+  *Finds Euclidean distance between solution and target image
+  *Samples some number of points in the images
+  */
   public double fitness(GASolution sol){
     BufferedImage curr = sol.getImage();
     double counter = 0;
@@ -185,7 +188,10 @@ class GA extends JComponent{
     }
     return 1/(counter/samplesize);
   }
-
+  /**
+  *Takes current population, calculates fitness for solutions
+  *Adds those solutions to a list
+  */
   public void getPopFitness(){
 
     pop_fitness = new ArrayList<Double>();
@@ -193,7 +199,11 @@ class GA extends JComponent{
       pop_fitness.add(fitness(sol));
     }
   }
-  //Based off class example
+  /**
+  *Chooses a random GASolution based on random fitness level
+  *Based off class example
+  *@return GASolution
+  */
   public GASolution pickFitParent(){
     double totalFitness = 0;
     Random rand = new Random();
@@ -208,7 +218,11 @@ class GA extends JComponent{
     }
     return population.get(index);
   }
-
+  /**
+  *Deep copy of MyPolygon object's Polygon
+  *@param MyPolygon
+  *@return Polygon
+  */
   public Polygon copyPoly(MyPolygon mp){
     Polygon p = mp.getPolygon();
     int[] xcopy = new int[MAX_POLYGON_POINTS];
@@ -220,10 +234,14 @@ class GA extends JComponent{
     Polygon copy = new Polygon(xcopy, ycopy, MAX_POLYGON_POINTS);
     return copy;
   }
-  //Averages color values of parents
-  //Randomly chooses some number of polygons to move to child from each parent
+  /**
+  *Averages color values of parents
+  *Randomly chooses some number of polygons to move to child from each parent
+  *@param GASolution, GASolution
+  *@return ArrayList<MyPolygon>
+  */
   public ArrayList<MyPolygon> crossover(GASolution p1, GASolution p2){
-    //average of colors?
+
     ArrayList<MyPolygon> chrom_1 = p1.getShapes();
     ArrayList<MyPolygon> chrom_2 = p2.getShapes();
     ArrayList<MyPolygon> new_chrom = new ArrayList<MyPolygon>();
@@ -251,8 +269,15 @@ class GA extends JComponent{
 
     return new_chrom;
   }
-//Changes color and polygon coordinates
-//Uses normal distribution to choose new color and coordinates
+
+  /**
+  *Given a list of mypolygons
+  *Changes color and polygon coordinates
+  *Uses normal distribution to choose new color and coordinates
+  *returns mutated list of mypolygons
+  *@param ArrayList<MyPolygon>
+  *@return ArrayList<MyPolygon>
+  */
   public ArrayList<MyPolygon> mutate(ArrayList<MyPolygon> child){
     Random r = new Random();
     for(int i = 0; i < child.size(); i++){
@@ -291,7 +316,9 @@ class GA extends JComponent{
     }
     return child;
   }
-
+  /**
+  *Chooses which solutions to move into the next generation
+  */
   public void createNewPopulation(){
     ArrayList<GASolution> newPop = new ArrayList<GASolution>();
     for(int i = 0; i < population.size(); i++){
@@ -315,7 +342,10 @@ class GA extends JComponent{
     }
     population = newPop;
   }
-
+  /**
+  *Runs genetic algorithm for certain amount of specified generations
+  *Displays best solution every 10 generations
+  */
   public void runSimulation() {
 
     for(int i = 0; i < NUM_EPOCHS; i++){
